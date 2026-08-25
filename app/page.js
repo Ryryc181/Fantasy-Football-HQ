@@ -1,184 +1,38 @@
-'use client';
+'use client'
+import {useState} from 'react'
 
-import Image from 'next/image';
-import { useMemo, useState } from 'react';
-import { availabilityChoices, draftOptions } from '../lib/draftOptions';
+const teams={
+'Clontarf':['Bijan Robinson · RB','Justin Herbert · QB','Dak Prescott · QB','Jeremiyah Love · RB','Tee Higgins · WR','Colston Loveland · TE','DeVonta Smith · WR','Mike Evans · WR','Parker Washington · WR','Jordyn Tyson · WR','Rashee Rice · WR','Kyle Pitts Sr. · TE','Chuba Hubbard · RB','Bryce Young · QB','Alec Pierce · WR','Vikings · DEF','Cameron Dicker · K'],
+'TheDarkKnight':['Jahmyr Gibbs · RB','Kenneth Walker III · RB','Jalen Hurts · QB','Malik Nabers · WR','DJ Moore · WR','Tetairoa McMillan · WR','Tyler Warren · TE','TreVeyon Henderson · RB','Brandon Aubrey · K','Patriots · DEF','Quentin Johnston · WR','Harold Fannin Jr. · TE','Michael Wilson · WR','Matthew Stafford · QB','Chris Rodriguez Jr. · RB','Geno Smith · QB','Dalton Kincaid · TE'],
+"Daniels Tiger's Neighborhood":["Ja'Marr Chase · WR",'Omarion Hampton · RB','Brock Purdy · QB','Breece Hall · RB','Chris Olave · WR','Baker Mayfield · QB','Garrett Wilson · WR','Malik Willis · QB','George Kittle · TE','Carnell Tate · WR','Chris Godwin Jr. · WR','Rachaad White · RB','Kenny Gainwell · RB','Juwan Johnson · TE','Christian Watson · WR','Eagles · DEF','Jason Myers · K'],
+'Team formerly known as SS':['Jonathan Taylor · RB','James Cook III · RB','A.J. Brown · WR','Kyler Murray · QB','Jordan Love · QB',"D'Andre Swift · RB",'Rico Dowdle · RB','Matthew Golden · WR','Travis Kelce · TE','Michael Pittman Jr. · WR','Jordan Addison · WR','Kirk Cousins · QB','Fernando Mendoza · QB','Malik Washington · WR','Keenan Allen · WR','Lions · DEF','Harrison Mevis · K'],
+'Curly Q':['Josh Allen · QB','Christian McCaffrey · RB','Trevor Lawrence · QB','Nico Collins · WR','Zay Flowers · WR','Josh Jacobs · RB','Terry McLaurin · WR','Bucky Irving · RB','Jaylen Warren · RB','Rhamondre Stevenson · RB','DK Metcalf · WR','Brock Bowers · TE','Jayden Reed · WR','Cam Ward · QB','Jakobi Meyers · WR','Jalen Coker · WR','Keaton Mitchell · RB'],
+'FAFO':['Jaxon Smith-Njigba · WR','Derrick Henry · RB','Jayden Daniels · QB','Drake Maye · QB','Ladd McConkey · WR','Emeka Egbuka · WR','J.K. Dobbins · RB','Chase Brown · RB','C.J. Stroud · QB','Jordan Mason · RB','Josh Downs · WR','Courtland Sutton · WR','Makai Lemon · WR','Tyrone Tracy Jr. · RB','Jake Ferguson · TE','Steelers · DEF','Eddy Pineiro · K'],
+'Nixflix and Chill':['Amon-Ra St. Brown · WR','Lamar Jackson · QB','Ashton Jeanty · RB','Trey McBride · TE','Jaxson Dart · QB','Bo Nix · QB','Davante Adams · WR','Bhayshul Tuten · RB','Jonathon Brooks · RB','Marvin Harrison Jr. · WR','Kyle Monangai · RB','Stefon Diggs · WR','Quinshon Judkins · RB','Xavier Worthy · WR','KC Concepcion · WR','Texans · DEF','Cam Little · K'],
+'To Infinity and Bijan':['CeeDee Lamb · WR','Caleb Williams · QB','Jared Goff · QB','Kyren Williams · RB','Javonte Williams · RB','Jaylen Waddle · WR','David Montgomery · RB','Sam LaPorta · TE','Brian Thomas Jr. · WR','RJ Harvey · RB','Aaron Jones Sr. · RB','Rams · DEF','Khalil Shakir · WR','Mark Andrews · TE','Luther Burden III · WR','Cairo Santos · K','Romeo Doubs · WR'],
+'Mad_Range':['Puka Nacua · WR','Joe Burrow · QB',"De'Von Achane · RB",'George Pickens · WR','Patrick Mahomes · QB','Jadarian Price · RB','Jameson Williams · WR','Tucker Kraft · TE',"Wan'Dale Robinson · WR",'Jacory Croskey-Merritt · RB','Broncos · DEF','Travis Etienne Jr. · RB','Jacoby Brissett · QB','Isaiah Likely · TE','KaVontae Turpin · WR',"Ka'imi Fairbairn · K",'Chimere Dike · WR'],
+'Incestual Cousins':['Saquon Barkley · RB','Justin Jefferson · WR','Sam Darnold · QB','Drake London · WR','Tyler Shough · QB','Rome Odunze · WR','Daniel Jones · QB','Blake Corum · RB','Cam Skattebo · RB','Tony Pollard · RB','Dallas Goedert · TE','Rashid Shaheed · WR','Deebo Samuel Sr. · WR','Seahawks · DEF','Will Reichard · K','Tank Bigsby · RB','Tre Tucker · WR']}
+const ranks=[
+['Curly Q','A+','1st–4th','Allen/Lawrence + deepest RB room','Week 7 QB bye collision; CMC durability'],['Nixflix and Chill','A+','1st–4th','Lamar/Nix/Dart + WR/TE ceiling','RB health and role clarity'],['FAFO','A','1st–5th','Best three-QB depth; balanced bench','TE edge and Henry age'],['TheDarkKnight','A-','2nd–7th','Stafford/Hurts + Gibbs/Nabers ceiling','Injury/age concentration'],['Clontarf','A-','2nd–7th','Dak/Herbert/Bijan scoring spine','RB depth behind Bijan'],['Mad_Range','A-','2nd–7th','Burrow/Mahomes + Puka/Achane stars','Top-heavy RB/WR depth'],["Daniels Tiger's Neighborhood",'B+','3rd–8th','Chase/Olave/Wilson + strong starters','Less QB scoring leverage'],['To Infinity and Bijan','B+','4th–9th','Excellent RB/TE depth','Only two QBs'],['Team formerly known as SS','B+','4th–10th','Taylor/Cook and deep RB room','QB ceiling vs league leaders'],['Incestual Cousins','C+','6th–10th','Jefferson/London/Odunze + Saquon','QB room is major scoring disadvantage']]
+const hist=[['Matthew Stafford','QB',668.55],['Josh Allen','QB',624.13],['Drake Maye','QB',613.43],['Dak Prescott','QB',604.11],['Jonathan Taylor','RB',593.80],['Bo Nix','QB',579.78],['Caleb Williams','QB',579.68],['Christian McCaffrey','RB',576.10],['Trevor Lawrence','QB',572.54],['Bijan Robinson','RB',564.30],['Jahmyr Gibbs','RB',560.40],['Jared Goff','QB',553.95],['Jalen Hurts','QB',538.15],['James Cook III','RB',516.70],['Justin Herbert','QB',513.71],['Patrick Mahomes','QB',500.75],['Baker Mayfield','QB',499.06],['Derrick Henry','RB',486],['De\'Von Achane','RB',474.8],['Puka Nacua','WR',457]]
+const notes={
+'Curly Q':'Championship-level floor. Allen/Lawrence fit the scoring system perfectly and the RB bench is the league’s deepest. The shared Week 7 QB bye is a real issue; Ward only covers one slot. Best move: secure QB4 insurance before Week 7.',
+'Nixflix and Chill':'Built for Fantasy Fools scoring leverage. Lamar + 2025 No. 6 overall scorer Bo Nix creates a weekly QB edge; Dart gives premium insurance. WR/TE is championship caliber. The swing factor is RB2: Jeanty health plus one of Judkins/Tuten/Brooks/Monangai emerging.',
+'FAFO':'The cleanest three-QB construction: Daniels/Maye/Stroud. Excellent bye and injury resistance at the league’s most valuable position. Best move: hold Stroud until QB scarcity spikes, then consider converting him into an elite RB/TE upgrade.',
+'TheDarkKnight':'Stafford was the highest scorer in Fantasy Fools last year, so Stafford/Hurts is far stronger here than generic rankings imply. Gibbs and Nabers add elite ceiling. Best move: use surplus TE depth to reinforce RB if needed.',
+'Clontarf':'Dak/Herbert plus Bijan is a massive weekly scoring spine. WR depth is sneaky good. RB depth behind Bijan is the clear concern. Best move: add a stable volume RB without sacrificing either starting QB.',
+'Mad_Range':'Burrow/Mahomes and Puka/Achane give league-winning weekly upside, but the roster becomes thin quickly behind those stars. Best move: add a dependable volume RB rather than another boom-or-bust piece.',
+"Daniels Tiger's Neighborhood":'Chase/Olave/Garrett Wilson may be the league’s best starting WR trio. Purdy/Baker are solid but can lose ground against the elite Fantasy Fools QB rooms. Best move: improve QB3 and preserve the strong skill-position core.',
+'To Infinity and Bijan':'Caleb/Goff were enormous scorers in this system and the RB/TE bench is deep. The structural issue is carrying only two QBs in a mandatory 2QB league. Best move: acquire QB3 before an injury or bye creates desperation.',
+'Team formerly known as SS':'Taylor/Cook can create the league’s strongest RB1/RB2 weekly advantage. The roster has enough RB depth to trade from strength. Best move: explore converting an extra RB into higher-end QB production.',
+'Incestual Cousins':'Saquon/Jefferson/London/Odunze is elite skill talent, but this league’s scoring makes the Darnold/Shough/Jones QB room a mathematical disadvantage. Best move: aggressively trade WR/RB depth for a higher-ceiling QB.'}
 
-const emptyAvailability = Object.fromEntries(draftOptions.map((option) => [option.id, '']));
-
-export default function HomePage() {
-  const [name, setName] = useState('');
-  const [availability, setAvailability] = useState(emptyAvailability);
-  const [mode, setMode] = useState('');
-  const [comments, setComments] = useState('');
-  const [status, setStatus] = useState({ type: '', message: '' });
-  const [submitting, setSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-
-  const workableCount = useMemo(
-    () => Object.values(availability).filter((value) => value === 'great' || value === 'work').length,
-    [availability]
-  );
-
-  function setChoice(optionId, value) {
-    setAvailability((current) => ({ ...current, [optionId]: value }));
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    setStatus({ type: '', message: '' });
-
-    if (!name.trim()) {
-      setStatus({ type: 'error', message: 'Please enter your name.' });
-      return;
-    }
-
-    const unanswered = draftOptions.filter((option) => !availability[option.id]);
-    if (unanswered.length) {
-      setStatus({ type: 'error', message: 'Please answer every draft-time option.' });
-      return;
-    }
-
-    if (workableCount < 2) {
-      setStatus({ type: 'error', message: 'Please mark at least two times as Works Great or I Can Make It Work.' });
-      return;
-    }
-
-    if (!mode) {
-      setStatus({ type: 'error', message: 'Please answer how you plan to participate.' });
-      return;
-    }
-
-    setSubmitting(true);
-    try {
-      const response = await fetch('/api/responses', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim(), availability, mode, comments: comments.trim() })
-      });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || 'Something went wrong.');
-      setSubmitted(true);
-      setStatus({ type: 'success', message: 'Your vote has been recorded.' });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } catch (error) {
-      setStatus({ type: 'error', message: error.message });
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  if (submitted) {
-    return (
-      <main className="site-shell confirmation-shell">
-        <section className="confirmation-card">
-          <Image src="/images/smack-talk.jpg" alt="Fantasy Fools league members joking around" width={1152} height={2048} className="confirmation-image" priority />
-          <div className="confirmation-copy">
-            <span className="eyebrow">Vote submitted</span>
-            <h1>Talking smack is mandatory. Winning is optional.</h1>
-            <p>Thanks, {name}. Your draft availability is officially in the commissioner&apos;s hands.</p>
-            <button className="secondary-button" onClick={() => window.location.reload()}>Submit another response</button>
-          </div>
-        </section>
-      </main>
-    );
-  }
-
-  return (
-    <main>
-      <header className="hero">
-        <div className="hero-overlay" />
-        <div className="hero-inner site-shell">
-          <div className="hero-copy">
-            <span className="eyebrow">Yahoo League • 2026 Draft</span>
-            <h1>Fantasy Fools Draft Headquarters</h1>
-            <p>Commissioner Ryan has spoken. Pick the times you can make so we can lock in draft night before somebody starts making excuses.</p>
-            <div className="hero-badges"><span>🏈 All answers required</span><span>📱 Takes about 2 minutes</span></div>
-          </div>
-          <figure className="hero-photo-card">
-            <Image src="/images/commissioner-snoop.jpg" alt="Fantasy Fools commissioner posing at an event" width={1123} height={1401} priority />
-            <figcaption><strong>Commissioner&apos;s orders:</strong> Complete the survey or prepare to be publicly shamed.</figcaption>
-          </figure>
-        </div>
-      </header>
-
-      <div className="site-shell content-grid">
-        <form className="survey-card" onSubmit={handleSubmit} noValidate>
-          <section className="question-section">
-            <div className="question-number">1</div>
-            <div className="question-content">
-              <label className="question-title" htmlFor="name">Name <span>*</span></label>
-              <input id="name" className="text-input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter your name" required />
-            </div>
-          </section>
-
-          <section className="question-section availability-section">
-            <div className="question-number">2</div>
-            <div className="question-content">
-              <h2 className="question-title">Pick your availability for every draft time <span>*</span></h2>
-              <p className="question-help">Choose one answer for every option. You must mark at least two times as <strong>Works Great</strong> or <strong>I Can Make It Work</strong>.</p>
-              <div className="availability-progress"><span>{workableCount} workable option{workableCount === 1 ? '' : 's'} selected</span><span>Minimum: 2</span></div>
-              <div className="date-list">
-                {draftOptions.map((option) => (
-                  <fieldset className="date-card" key={option.id}>
-                    <legend>{option.label}</legend>
-                    <div className="choice-grid">
-                      {availabilityChoices.map((choice) => (
-                        <label className={`choice-card ${availability[option.id] === choice.value ? 'selected' : ''}`} key={choice.value}>
-                          <input type="radio" name={option.id} value={choice.value} checked={availability[option.id] === choice.value} onChange={() => setChoice(option.id, choice.value)} required />
-                          <span className="choice-icon">{choice.icon}</span>
-                          <span><strong>{choice.label}</strong><small>{choice.helper}</small></span>
-                        </label>
-                      ))}
-                    </div>
-                  </fieldset>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <aside className="safety-card">
-            <Image src="/images/wrist-ir.jpg" alt="Fantasy Fools member posing after a wrist injury" width={1500} height={2000} />
-            <div><span className="eyebrow">Official league safety notice</span><h2>Punching bags remain undefeated.</h2><p>Please draft responsibly. Wrist injuries caused by unnecessary draft-night confidence may be mocked for multiple seasons.</p></div>
-          </aside>
-
-          <section className="question-section">
-            <div className="question-number">3</div>
-            <div className="question-content">
-              <h2 className="question-title">I would love to have everyone in person for the draft, but I understand that it&apos;s not always possible. I tried to give plenty of options so we can make that happen. If you can&apos;t, or just don&apos;t want to, there is an option for that. <span>*</span></h2>
-              <div className="stacked-options">
-                <label className={`long-choice ${mode === 'in-person' ? 'selected' : ''}`}>
-                  <input type="radio" name="mode" value="in-person" checked={mode === 'in-person'} onChange={(e) => setMode(e.target.value)} required />
-                  <span>Heck yea I will be drafting and talking smack at Ryan&apos;s house</span>
-                </label>
-                <label className={`long-choice ${mode === 'remote' ? 'selected' : ''}`}>
-                  <input type="radio" name="mode" value="remote" checked={mode === 'remote'} onChange={(e) => setMode(e.target.value)} required />
-                  <span>I will still be talking smack but will have to do it remotely - sorry I am lame</span>
-                </label>
-              </div>
-            </div>
-          </section>
-
-          <section className="question-section">
-            <div className="question-number">4</div>
-            <div className="question-content">
-              <label className="question-title" htmlFor="comments">Anything else I should know? <em>Optional</em></label>
-              <textarea id="comments" className="text-input textarea" value={comments} onChange={(e) => setComments(e.target.value)} placeholder="Schedule notes, food requests, excuses, or early-season smack talk..." />
-            </div>
-          </section>
-
-          {status.message && <div className={`status-message ${status.type}`}>{status.message}</div>}
-          <button className="submit-button" type="submit" disabled={submitting}>{submitting ? 'LOCKING IT IN...' : 'LOCK IN MY AVAILABILITY'}</button>
-          <p className="privacy-note">Submitting again with the same name updates that person&apos;s previous response.</p>
-        </form>
-
-        <aside className="sidebar">
-          <div className="sidebar-card"><h3>How the winner is picked</h3><p>The commissioner dashboard prioritizes the times that include the most owners, then uses preference points to separate ties.</p><ul><li>Works Great = 2 points</li><li>Can Make It Work = 1 point</li><li>Can&apos;t Make It = 0 points</li></ul></div>
-          <figure className="smack-photo"><Image src="/images/smack-talk.jpg" alt="Two Fantasy Fools league members joking around" width={1152} height={2048} /><figcaption>Two analysts conducting serious preseason research.</figcaption></figure>
-          <a className="commissioner-link" href="/commissioner">Commissioner dashboard →</a>
-        </aside>
-      </div>
-      <footer><strong>Fantasy Fools</strong><span>Where friendships are ruined one draft pick at a time.</span></footer>
-    </main>
-  );
-}
+export default function Page(){const [tab,setTab]=useState('HQ');const tabs=['HQ','Power Rankings','All Rosters','Nixflix','QB / Bye Strategy','2025 Scoring','League DNA'];return <><div className="hero"><h1>🏈 Fantasy Fools — Football HQ 2026</h1><div className="muted">Post-Draft Edition • Nixflix and Chill • Yahoo 10-team • True 2QB</div><div className="nav">{tabs.map(t=><button key={t} className={'btn '+(tab===t?'on':'')} onClick={()=>setTab(t)}>{t}</button>)}</div></div><main className="shell">
+{tab==='HQ'&&<div className="grid"><div className="card s3"><div className="muted">Nixflix Grade</div><div className="metric gold">A+</div></div><div className="card s3"><div className="muted">Power Rank</div><div className="metric">#2</div></div><div className="card s3"><div className="muted">League Edge</div><div className="metric accent">QB</div></div><div className="card s3"><div className="muted">Priority</div><div className="metric">RB2</div></div><div className="card s8"><h2>Executive Outlook</h2><p>Your completed roster is built correctly for Fantasy Fools: preserve premium QB production, use WR/TE depth to win weekly lineup battles, and let the young RB room reveal itself before forcing a trade.</p><p><b>Biggest edge:</b> Lamar/Nix/Dart gives you three usable QBs at a position that dominated the league’s 2025 scoring.</p></div><div className="card s4"><h2>Watch List</h2><p><b>Curly Q:</b> safest roster, but Week 7 QB collision.</p><p><b>FAFO:</b> best QB3 depth.</p><p><b>DarkKnight:</b> Stafford was 2025 No. 1 scorer.</p><p><b>Infinity:</b> only two QBs; potential trade partner.</p></div></div>}
+{tab==='Power Rankings'&&<div className="card"><h2>Preseason Power Rankings</h2><div className="scroll"><table className="table"><thead><tr><th>#</th><th>Team</th><th>Grade</th><th>Range</th><th>Strength</th><th>Weakness</th></tr></thead><tbody>{ranks.map((r,i)=><tr key={r[0]}><td>{i+1}</td><td><b>{r[0]}</b></td><td>{r[1]}</td><td>{r[2]}</td><td>{r[3]}</td><td>{r[4]}</td></tr>)}</tbody></table></div></div>}
+{tab==='All Rosters'&&<div className="grid">{ranks.map((r,i)=><div key={r[0]} className={'card s6 team '+(r[0]==='Nixflix and Chill'?'mine':'')}><h2>#{i+1} {r[0]} — {r[1]}</h2>{teams[r[0]].map(x=><span className="pill" key={x}>{x}</span>)}<h3>Deep Dive</h3><p>{notes[r[0]]}</p><p><b>Projected range:</b> {r[2]}</p><p><b>Strength:</b> {r[3]}</p><p><b>Weakness:</b> {r[4]}</p></div>)}</div>}
+{tab==='Nixflix'&&<div className="grid"><div className="card s6 mine"><h2>Nixflix and Chill Roster</h2>{teams['Nixflix and Chill'].map(x=><span className="pill" key={x}>{x}</span>)}</div><div className="card s6"><h2>Strategy</h2><p>{notes['Nixflix and Chill']}</p><p><b>Hold:</b> Lamar, Nix, Amon-Ra, McBride unless a massive premium is offered.</p><p><b>Wait:</b> Jeanty/Judkins/Tuten roles before paying for an RB.</p><p><b>Trade leverage:</b> Dart + WR depth become more valuable when another owner loses a QB.</p></div></div>}
+{tab==='QB / Bye Strategy'&&<div className="grid"><div className="card s6"><h2>QB Depth Ranking</h2><ol><li>FAFO — Daniels / Maye / Stroud</li><li>Nixflix — Lamar / Nix / Dart</li><li>TheDarkKnight — Hurts / Stafford / Geno</li><li>Clontarf — Herbert / Dak / Bryce</li><li>Mad_Range — Burrow / Mahomes / Brissett</li><li>Curly Q — Allen / Lawrence / Ward</li><li>Daniels Tiger — Purdy / Baker / Willis</li><li>Team formerly SS — Kyler / Love / Cousins / Mendoza</li><li>Infinity — Caleb / Goff</li><li>Incestual Cousins — Darnold / Shough / Jones</li></ol></div><div className="card s6"><h2>Scarcity / Bye Watch</h2><p className="warn"><b>Curly Q:</b> Allen and Lawrence share Week 7; Ward covers only one QB slot.</p><p className="warn"><b>To Infinity and Bijan:</b> only two QBs rostered.</p><p><b>Nixflix:</b> three-QB structure protects against normal bye and injury situations.</p><p>Because QB repeatedly fills the top of Fantasy Fools scoring, QB3 should be treated as strategic inventory, not ordinary bench depth.</p></div></div>}
+{tab==='2025 Scoring'&&<div className="card"><h2>2025 Fantasy Fools — Top Historical Scorers</h2><table className="table"><thead><tr><th>#</th><th>Player</th><th>Pos</th><th>Points</th></tr></thead><tbody>{hist.map((h,i)=><tr key={h[0]}><td>{i+1}</td><td><b>{h[0]}</b></td><td>{h[1]}</td><td>{h[2].toFixed(2)}</td></tr>)}</tbody></table></div>}
+{tab==='League DNA'&&<div className="grid"><div className="card s6"><h2>Yahoo League DNA</h2><p><b>10 teams • 2 QB • 3 WR • 2 RB • 1 TE • 1 FLEX • K • DEF • 6 bench • 1 IR</b></p><p>Full PPR; 6-point passing TDs; 0.5 points per completion; -4 interceptions; -1 per sack; 0.5 points per rushing attempt; explosive-play bonuses; enhanced kicker/DST scoring.</p></div><div className="card s6"><h2>Model Interpretation</h2><p><b>QB:</b> highest premium due to two required starters and historical scoring.</p><p><b>RB:</b> volume backs gain value from rushing-attempt scoring.</p><p><b>WR:</b> three required starters preserve depth value.</p><p><b>K/DEF:</b> more important than in standard formats because your scoring can create larger weekly swings.</p></div></div>}
+</main></>}
