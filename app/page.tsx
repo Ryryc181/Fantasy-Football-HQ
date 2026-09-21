@@ -1,0 +1,7 @@
+import Controls from './components/Controls';import DashboardTabs from './components/DashboardTabs';import {getLiveLeague} from '@/lib/liveLeague';import {adminSupabase} from '@/lib/supabase';
+export const dynamic='force-dynamic';
+export default async function Home(){
+ const payload:any=await getLiveLeague();let news:any[]=[];try{const sb=adminSupabase();const n=await sb.from('news_items').select('*').order('published_at',{ascending:false}).limit(35);news=n.data||[]}catch{}
+ const teams=payload?.teams||[],fas=payload?.free_agents||[],mine=teams.find((t:any)=>t.name===(process.env.NIXFLIX_TEAM_NAME||'Nixflix and Chill'));
+ return <><header className="hero"><div className="heroInner"><div><div className="eyebrow">10-team • 2QB • custom Fantasy Fools scoring • Front Office</div><h1>🏈 Fantasy Fools HQ 2026</h1><div className="muted"><span className={`statusDot ${payload&&!payload.error?'live':''}`}/>{payload&&!payload.error?`Live Yahoo session • ${new Date(payload.synced_at).toLocaleString()}`:payload?.error?`Yahoo connection: ${payload.error}`:'Yahoo provisioning pending'}</div></div><Controls/></div></header><main className="shell"><DashboardTabs payload={payload} news={news} mine={mine} teams={teams} fas={fas}/><footer className="footer"><span>Fantasy Fools HQ • personal league analysis</span><span>Fantasy data provided by <a href="https://football.fantasysports.yahoo.com/" target="_blank" rel="noreferrer">Yahoo Fantasy</a></span></footer></main></>
+}

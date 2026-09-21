@@ -1,0 +1,2 @@
+import {NextResponse} from 'next/server';import {getLiveLeague} from '@/lib/liveLeague';
+export async function POST(){const data:any=await getLiveLeague();if(!data||data.error)return NextResponse.json({error:data?.error||'Yahoo not configured'},{status:400});return NextResponse.json({ok:true,teams:data.teams.length,free_agents:data.free_agents.length,synced_at:data.synced_at,note:'Yahoo Fantasy data was fetched live and was not persisted.'});}
